@@ -24,14 +24,14 @@ const Index = () => {
   const [calculationEndDate, setCalculationEndDate] = useState('2025-01-30');
   const [activeTab, setActiveTab] = useState<'attendance' | 'members' | 'summary'>('attendance');
   const [members, setMembers] = useState<Member[]>([
-    { id: '1', name: 'DWIGHT', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
-    { id: '2', name: 'MYCE', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
-    { id: '3', name: 'ZI', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
-    { id: '4', name: 'JAJA', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
-    { id: '5', name: 'JV', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
-    { id: '6', name: 'ANGEL', startDate: '2024-12-30', daysOut: 13, daysIn: 10 },
-    { id: '7', name: 'ART', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
-    { id: '8', name: 'PRINCE', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
+    { id: '1', name: 'DWIGHT', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
+    { id: '2', name: 'MYCE', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
+    { id: '3', name: 'ZI', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
+    { id: '4', name: 'JAJA', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
+    { id: '5', name: 'JV', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
+    { id: '6', name: 'ANGEL', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
+    { id: '7', name: 'ART', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
+    { id: '8', name: 'PRINCE', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
   ]);
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -63,7 +63,7 @@ const Index = () => {
           return {
             ...member,
             daysOut: newDaysOut,
-            daysIn: totalDays - newDaysOut
+            daysIn: 30 - newDaysOut
           };
         }
         return member;
@@ -77,7 +77,7 @@ const Index = () => {
       prevMembers.map(member => ({
         ...member,
         daysOut: 0,
-        daysIn: totalDays
+        daysIn: 30
       }))
     );
   };

@@ -191,14 +191,14 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
           </div>
         </div>
 
-        {/* Selected Date Members */}
+        {/* Selected Date Members - 2 Columns */}
         {selectedDate && (
           <div className="space-y-3 border-t pt-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
               <Users className="h-4 w-4" />
               {format(selectedDate, 'MMMM dd, yyyy')}
             </div>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
               {members.map(member => (
                 <div key={member.id} className="flex items-center space-x-2">
                   <Checkbox
