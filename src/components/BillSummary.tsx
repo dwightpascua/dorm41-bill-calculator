@@ -17,6 +17,7 @@ interface BillSummaryProps {
   totalDays: number;
   perDay: number;
   billCalculation: BillCalculation;
+  showBillSettings?: boolean;
 }
 
 export const BillSummary: React.FC<BillSummaryProps> = ({
@@ -24,6 +25,7 @@ export const BillSummary: React.FC<BillSummaryProps> = ({
   totalDays,
   perDay,
   billCalculation,
+  showBillSettings = true,
 }) => {
   const totalCalculated = Object.values(billCalculation).reduce((sum, calc) => sum + calc.amount, 0);
   const totalMembers = Object.keys(billCalculation).length;

@@ -2,8 +2,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Users, ChevronLeft, ChevronRight, Settings, RotateCcw } from 'lucide-react';
 import { format, getDaysInMonth, startOfMonth, getDay, addMonths, subMonths } from 'date-fns';
 
 interface Member {
@@ -20,6 +22,11 @@ interface BillCalendarProps {
   members: Member[];
   absentMembers: { [key: string]: string[] };
   onMemberAbsence: (memberId: string, date: string, isAbsent: boolean) => void;
+  calculationStartDate: string;
+  calculationEndDate: string;
+  onCalculationStartDateChange: (date: string) => void;
+  onCalculationEndDateChange: (date: string) => void;
+  onReset: () => void;
 }
 
 export const BillCalendar: React.FC<BillCalendarProps> = ({
@@ -28,8 +35,14 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
   members,
   absentMembers,
   onMemberAbsence,
+  calculationStartDate,
+  calculationEndDate,
+  onCalculationStartDateChange,
+  onCalculationEndDateChange,
+  onReset,
 }) => {
   const [currentMonth, setCurrentMonth] = React.useState(selectedDate || new Date());
+  const [showSettings, setShowSettings] = React.useState(false);
   const daysInMonth = getDaysInMonth(currentMonth);
   const firstDayOfMonth = startOfMonth(currentMonth);
   const startingDayOfWeek = getDay(firstDayOfMonth);
@@ -95,10 +108,60 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-700">
-          <Calendar className="h-5 w-5" />
-          Attendance Calendar
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-blue-700">
+            <Calendar className="h-5 w-5" />
+            Attendance Calendar
+          </CardTitle>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowSettings(!showSettings)}
+              className="h-8"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onReset}
+              className="h-8 text-red-600 hover:text-red-700"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Calculation Span Settings */}
+        {showSettings && (
+          <div className="space-y-3 border-t pt-3">
+            <h4 className="text-sm font-semibold text-gray-700">Calculation Period</h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="startDate" className="text-xs">Start Date</Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={calculationStartDate}
+                  onChange={(e) => onCalculationStartDateChange(e.target.value)}
+                  className="text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="endDate" className="text-xs">End Date</Label>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={calculationEndDate}
+                  onChange={(e) => onCalculationEndDateChange(e.target.value)}
+                  className="text-xs"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={handlePrevMonth}>
             <ChevronLeft className="h-4 w-4" />

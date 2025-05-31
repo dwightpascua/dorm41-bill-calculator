@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar, Users, Calculator } from 'lucide-react';
+import { Calendar, Users, Calculator, RotateCcw } from 'lucide-react';
 import { BillCalendar } from '@/components/BillCalendar';
 import { MembersList } from '@/components/MembersList';
 import { BillSummary } from '@/components/BillSummary';
@@ -21,6 +21,8 @@ interface Member {
 const Index = () => {
   const [totalBill, setTotalBill] = useState(4967.37);
   const [totalDays, setTotalDays] = useState(30);
+  const [calculationStartDate, setCalculationStartDate] = useState('2024-12-30');
+  const [calculationEndDate, setCalculationEndDate] = useState('2025-01-30');
   const [activeTab, setActiveTab] = useState<'attendance' | 'members' | 'summary'>('attendance');
   const [members, setMembers] = useState<Member[]>([
     { id: '1', name: 'DWIGHT', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
@@ -70,6 +72,17 @@ const Index = () => {
     );
   };
 
+  const handleReset = () => {
+    setAbsentMembers({});
+    setMembers(prevMembers => 
+      prevMembers.map(member => ({
+        ...member,
+        daysOut: 0,
+        daysIn: totalDays
+      }))
+    );
+  };
+
   const renderActiveContent = () => {
     switch (activeTab) {
       case 'attendance':
@@ -80,6 +93,11 @@ const Index = () => {
             members={members}
             absentMembers={absentMembers}
             onMemberAbsence={handleMemberAbsence}
+            calculationStartDate={calculationStartDate}
+            calculationEndDate={calculationEndDate}
+            onCalculationStartDateChange={setCalculationStartDate}
+            onCalculationEndDateChange={setCalculationEndDate}
+            onReset={handleReset}
           />
         );
       case 'members':
@@ -97,6 +115,7 @@ const Index = () => {
             totalDays={totalDays}
             perDay={perDay}
             billCalculation={billCalculation}
+            showBillSettings={false}
           />
         );
       default:
@@ -113,45 +132,47 @@ const Index = () => {
           <p className="text-gray-600">Manage monthly electricity costs and member attendance</p>
         </div>
 
-        {/* Compact Bill Settings */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-blue-700 text-lg">
-              <Calculator className="h-4 w-4" />
-              Bill Settings
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="totalBill" className="text-xs">Total Bill (₱)</Label>
-                <Input
-                  id="totalBill"
-                  type="number"
-                  value={totalBill}
-                  onChange={(e) => setTotalBill(parseFloat(e.target.value) || 0)}
-                  className="text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="totalDays" className="text-xs">Total Days</Label>
-                <Input
-                  id="totalDays"
-                  type="number"
-                  value={totalDays}
-                  onChange={(e) => setTotalDays(parseInt(e.target.value) || 30)}
-                  className="text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Per Day Rate</Label>
-                <div className="bg-blue-50 rounded px-2 py-1.5 text-center">
-                  <p className="text-sm font-bold text-blue-700">₱{perDay.toFixed(2)}</p>
+        {/* Compact Bill Settings - Only show when not on summary tab */}
+        {activeTab !== 'summary' && (
+          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-blue-700 text-lg">
+                <Calculator className="h-4 w-4" />
+                Bill Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="totalBill" className="text-xs">Total Bill (₱)</Label>
+                  <Input
+                    id="totalBill"
+                    type="number"
+                    value={totalBill}
+                    onChange={(e) => setTotalBill(parseFloat(e.target.value) || 0)}
+                    className="text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="totalDays" className="text-xs">Total Days</Label>
+                  <Input
+                    id="totalDays"
+                    type="number"
+                    value={totalDays}
+                    onChange={(e) => setTotalDays(parseInt(e.target.value) || 30)}
+                    className="text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Per Day Rate</Label>
+                  <div className="bg-blue-50 rounded px-2 py-1.5 text-center">
+                    <p className="text-sm font-bold text-blue-700">₱{perDay.toFixed(2)}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Content */}
         <div className="min-h-[400px]">
