@@ -21,32 +21,31 @@ export const calculateBill = (
   totalDays: number
 ): BillCalculation => {
   const calculation: BillCalculation = {};
+  const perDayRate = totalBill / totalDays;
   
-  // Group members by dates to handle varying member counts
-  const membersByDate = new Map<string, number>();
-  const dateRange = Array.from({length: totalDays}, (_, i) => i + 1);
+  // Create a map to track how many members are present each day
+  const membersByDay = new Array(totalDays).fill(0);
   
-  dateRange.forEach(day => {
-    const presentMembers = members.filter(member => {
-      const absentDays = member.daysOut;
-      return absentDays < day;
-    }).length;
-    membersByDate.set(day.toString(), presentMembers);
+  // Count present members for each day
+  members.forEach(member => {
+    for (let day = 0; day < totalDays; day++) {
+      if (day < member.daysIn) {
+        membersByDay[day]++;
+      }
+    }
   });
 
-  // Calculate each member's share based on daily rates
+  // Calculate each member's share
   members.forEach(member => {
     let totalAmount = 0;
-    const dailyRate = totalBill / totalDays;
-
-    // For each day, calculate the member's share based on number of present members
-    dateRange.forEach(day => {
-      const presentMembers = membersByDate.get(day.toString()) || members.length;
-      const memberPresentOnDay = member.daysOut < day;
-      if (memberPresentOnDay) {
-        totalAmount += dailyRate / presentMembers;
+    
+    // For each day the member is present, add their share based on number of present members that day
+    for (let day = 0; day < member.daysIn; day++) {
+      const presentMembers = membersByDay[day];
+      if (presentMembers > 0) {
+        totalAmount += perDayRate / presentMembers;
       }
-    });
+    }
 
     calculation[member.id] = {
       name: member.name,

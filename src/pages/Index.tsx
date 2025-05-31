@@ -31,7 +31,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<'attendance' | 'members' | 'summary'>('attendance');
   const [members, setMembers] = useState<Member[]>([
     { id: '1', name: 'DWIGHT', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
-    { id: '2', name: 'MYCE', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
+    { id: '2', name: 'VINCE', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
     { id: '3', name: 'ZI', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
     { id: '4', name: 'JAJA', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
     { id: '5', name: 'JV', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
