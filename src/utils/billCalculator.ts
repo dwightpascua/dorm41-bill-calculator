@@ -1,4 +1,3 @@
-
 interface Member {
   id: string;
   name: string;
@@ -23,61 +22,39 @@ export const calculateBill = (
 ): BillCalculation => {
   const calculation: BillCalculation = {};
   
-  // Calculate per day rate
-  const perDayRate = totalBill / totalDays;
+  // Group members by dates to handle varying member counts
+  const membersByDate = new Map<string, number>();
+  const dateRange = Array.from({length: totalDays}, (_, i) => i + 1);
   
-  // Calculate total member-days (sum of all days each member was present)
-  const totalMemberDays = members.reduce((sum, member) => sum + member.daysIn, 0);
-  
-  // If no member-days, return empty calculation
-  if (totalMemberDays === 0) {
-    return calculation;
-  }
-  
-  // Calculate cost per member-day
-  const costPerMemberDay = totalBill / totalMemberDays;
-  
-  // Calculate each member's share
+  dateRange.forEach(day => {
+    const presentMembers = members.filter(member => {
+      const absentDays = member.daysOut;
+      return absentDays < day;
+    }).length;
+    membersByDate.set(day.toString(), presentMembers);
+  });
+
+  // Calculate each member's share based on daily rates
   members.forEach(member => {
-    const memberAmount = member.daysIn * costPerMemberDay;
-    
+    let totalAmount = 0;
+    const dailyRate = totalBill / totalDays;
+
+    // For each day, calculate the member's share based on number of present members
+    dateRange.forEach(day => {
+      const presentMembers = membersByDate.get(day.toString()) || members.length;
+      const memberPresentOnDay = member.daysOut < day;
+      if (memberPresentOnDay) {
+        totalAmount += dailyRate / presentMembers;
+      }
+    });
+
     calculation[member.id] = {
       name: member.name,
       daysIn: member.daysIn,
       daysOut: member.daysOut,
-      amount: memberAmount,
+      amount: totalAmount,
     };
   });
   
   return calculation;
-};
-
-export const getMemberPerDayRates = (
-  members: Member[], 
-  totalBill: number, 
-  totalDays: number
-): { [key: number]: number } => {
-  const rates: { [key: number]: number } = {};
-  
-  // Group members by their present days count
-  const membersByDays = members.reduce((acc, member) => {
-    if (!acc[member.daysIn]) {
-      acc[member.daysIn] = [];
-    }
-    acc[member.daysIn].push(member);
-    return acc;
-  }, {} as { [key: number]: Member[] });
-  
-  // Calculate rates based on Excel logic
-  Object.keys(membersByDays).forEach(daysStr => {
-    const days = parseInt(daysStr);
-    const membersWithThisDayCount = membersByDays[days];
-    const totalMemberDays = members.reduce((sum, member) => sum + member.daysIn, 0);
-    
-    if (totalMemberDays > 0) {
-      rates[days] = totalBill / totalMemberDays;
-    }
-  });
-  
-  return rates;
 };

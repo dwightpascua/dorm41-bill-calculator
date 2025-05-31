@@ -8,6 +8,7 @@ import { BillCalendar } from '@/components/BillCalendar';
 import { MembersList } from '@/components/MembersList';
 import { BillSummary } from '@/components/BillSummary';
 import { calculateBill } from '@/utils/billCalculator';
+import { startOfMonth, endOfMonth, format } from 'date-fns';
 
 interface Member {
   id: string;
@@ -18,20 +19,25 @@ interface Member {
 }
 
 const Index = () => {
+  // Set initial dates to current month
+  const currentDate = new Date();
+  const firstDayOfMonth = startOfMonth(currentDate);
+  const lastDayOfMonth = endOfMonth(currentDate);
+
   const [totalBill, setTotalBill] = useState(4967.37);
   const [totalDays, setTotalDays] = useState(30);
-  const [calculationStartDate, setCalculationStartDate] = useState('2024-12-30');
-  const [calculationEndDate, setCalculationEndDate] = useState('2025-01-30');
+  const [calculationStartDate, setCalculationStartDate] = useState(format(firstDayOfMonth, 'yyyy-MM-dd'));
+  const [calculationEndDate, setCalculationEndDate] = useState(format(lastDayOfMonth, 'yyyy-MM-dd'));
   const [activeTab, setActiveTab] = useState<'attendance' | 'members' | 'summary'>('attendance');
   const [members, setMembers] = useState<Member[]>([
-    { id: '1', name: 'DWIGHT', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
-    { id: '2', name: 'MYCE', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
-    { id: '3', name: 'ZI', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
-    { id: '4', name: 'JAJA', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
-    { id: '5', name: 'JV', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
-    { id: '6', name: 'ANGEL', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
-    { id: '7', name: 'ART', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
-    { id: '8', name: 'PRINCE', startDate: '2024-12-30', daysOut: 0, daysIn: 30 },
+    { id: '1', name: 'DWIGHT', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
+    { id: '2', name: 'MYCE', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
+    { id: '3', name: 'ZI', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
+    { id: '4', name: 'JAJA', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
+    { id: '5', name: 'JV', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
+    { id: '6', name: 'ANGEL', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
+    { id: '7', name: 'ART', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
+    { id: '8', name: 'PRINCE', startDate: format(firstDayOfMonth, 'yyyy-MM-dd'), daysOut: 0, daysIn: 30 },
   ]);
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -63,7 +69,7 @@ const Index = () => {
           return {
             ...member,
             daysOut: newDaysOut,
-            daysIn: 30 - newDaysOut
+            daysIn: totalDays - newDaysOut
           };
         }
         return member;
@@ -77,7 +83,7 @@ const Index = () => {
       prevMembers.map(member => ({
         ...member,
         daysOut: 0,
-        daysIn: 30
+        daysIn: totalDays
       }))
     );
   };

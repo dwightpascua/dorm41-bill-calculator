@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,13 +42,45 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
 }) => {
   const [currentMonth, setCurrentMonth] = React.useState(selectedDate || new Date());
   const [showSettings, setShowSettings] = React.useState(false);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+
   const daysInMonth = getDaysInMonth(currentMonth);
   const firstDayOfMonth = startOfMonth(currentMonth);
   const startingDayOfWeek = getDay(firstDayOfMonth);
 
   const handleDateClick = (day: number) => {
     const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    onDateSelect(newDate);
+    
+    if (isMultiSelectMode) {
+      setSelectedDates(prev => {
+        const dateExists = prev.some(date => 
+          date.getDate() === newDate.getDate() && 
+          date.getMonth() === newDate.getMonth() && 
+          date.getFullYear() === newDate.getFullYear()
+        );
+        
+        if (dateExists) {
+          return prev.filter(date => 
+            !(date.getDate() === newDate.getDate() && 
+              date.getMonth() === newDate.getMonth() && 
+              date.getFullYear() === newDate.getFullYear())
+          );
+        } else {
+          return [...prev, newDate];
+        }
+      });
+    } else {
+      onDateSelect(newDate);
+      setSelectedDates([]);
+    }
+  };
+
+  const handleMultipleAbsences = (memberId: string, isAbsent: boolean) => {
+    selectedDates.forEach(date => {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      onMemberAbsence(memberId, dateStr, isAbsent);
+    });
   };
 
   const handlePrevMonth = () => {
@@ -78,15 +109,24 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
                         selectedDate.getDate() === day && 
                         selectedDate.getMonth() === currentMonth.getMonth() &&
                         selectedDate.getFullYear() === currentMonth.getFullYear();
+      const isMultiSelected = selectedDates.some(date => 
+        date.getDate() === day && 
+        date.getMonth() === currentMonth.getMonth() && 
+        date.getFullYear() === currentMonth.getFullYear()
+      );
       const isToday = isCurrentMonth && today.getDate() === day;
       const absentCount = absentMembers[dateStr]?.length || 0;
 
       days.push(
         <Button
           key={day}
-          variant={isSelected ? "default" : "ghost"}
+          variant={isSelected || isMultiSelected ? "default" : "ghost"}
           size="sm"
-          className={`h-8 w-8 p-0 relative ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+          className={cn(
+            "h-8 w-8 p-0 relative",
+            isToday ? 'ring-2 ring-blue-500' : '',
+            isMultiSelected ? 'bg-blue-200' : ''
+          )}
           onClick={() => handleDateClick(day)}
         >
           {day}
@@ -114,6 +154,14 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
             Attendance Calendar
           </CardTitle>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsMultiSelectMode(!isMultiSelectMode)}
+              className={cn("h-8", isMultiSelectMode ? "bg-blue-100" : "")}
+            >
+              Multi-Select
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -133,7 +181,6 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
           </div>
         </div>
         
-        {/* Calculation Span Settings */}
         {showSettings && (
           <div className="space-y-3 border-t pt-3">
             <h4 className="text-sm font-semibold text-gray-700">Calculation Period</h4>
@@ -192,27 +239,36 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
         </div>
 
         {/* Selected Date Members - 2 Columns */}
-        {selectedDate && (
+        {(selectedDate || selectedDates.length > 0) && (
           <div className="space-y-3 border-t pt-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
               <Users className="h-4 w-4" />
-              {format(selectedDate, 'MMMM dd, yyyy')}
+              {selectedDates.length > 0 
+                ? `Multiple Dates Selected (${selectedDates.length})`
+                : format(selectedDate!, 'MMMM dd, yyyy')}
             </div>
             <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
               {members.map(member => (
                 <div key={member.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`absent-${member.id}`}
-                    checked={selectedDateAbsent.includes(member.id)}
+                    checked={selectedDates.length > 0 
+                      ? false // Reset state for multi-select
+                      : selectedDateAbsent.includes(member.id)}
                     onCheckedChange={(checked) => 
-                      onMemberAbsence(member.id, selectedDateStr, checked as boolean)
+                      selectedDates.length > 0
+                        ? handleMultipleAbsences(member.id, checked as boolean)
+                        : onMemberAbsence(member.id, selectedDateStr, checked as boolean)
                     }
                   />
                   <label 
                     htmlFor={`absent-${member.id}`}
-                    className={`text-sm font-medium cursor-pointer ${
-                      selectedDateAbsent.includes(member.id) ? 'line-through text-gray-500' : 'text-gray-700'
-                    }`}
+                    className={cn(
+                      "text-sm font-medium cursor-pointer",
+                      selectedDates.length === 0 && selectedDateAbsent.includes(member.id) 
+                        ? 'line-through text-gray-500' 
+                        : 'text-gray-700'
+                    )}
                   >
                     {member.name}
                   </label>
