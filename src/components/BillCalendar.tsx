@@ -3,8 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, Users } from 'lucide-react';
-import { format, getDaysInMonth, startOfMonth, getDay } from 'date-fns';
+import { Calendar, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, getDaysInMonth, startOfMonth, getDay, addMonths, subMonths } from 'date-fns';
 
 interface Member {
   id: string;
@@ -29,21 +29,29 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
   absentMembers,
   onMemberAbsence,
 }) => {
-  const currentDate = selectedDate || new Date();
-  const daysInMonth = getDaysInMonth(currentDate);
-  const firstDayOfMonth = startOfMonth(currentDate);
+  const [currentMonth, setCurrentMonth] = React.useState(selectedDate || new Date());
+  const daysInMonth = getDaysInMonth(currentMonth);
+  const firstDayOfMonth = startOfMonth(currentMonth);
   const startingDayOfWeek = getDay(firstDayOfMonth);
 
   const handleDateClick = (day: number) => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     onDateSelect(newDate);
+  };
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(prev => subMonths(prev, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(prev => addMonths(prev, 1));
   };
 
   const renderCalendarDays = () => {
     const days = [];
     const today = new Date();
-    const isCurrentMonth = currentDate.getMonth() === today.getMonth() && 
-                          currentDate.getFullYear() === today.getFullYear();
+    const isCurrentMonth = currentMonth.getMonth() === today.getMonth() && 
+                          currentMonth.getFullYear() === today.getFullYear();
 
     // Empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
@@ -52,8 +60,11 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
 
     // Calendar days
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), 'yyyy-MM-dd');
-      const isSelected = selectedDate && selectedDate.getDate() === day;
+      const dateStr = format(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day), 'yyyy-MM-dd');
+      const isSelected = selectedDate && 
+                        selectedDate.getDate() === day && 
+                        selectedDate.getMonth() === currentMonth.getMonth() &&
+                        selectedDate.getFullYear() === currentMonth.getFullYear();
       const isToday = isCurrentMonth && today.getDate() === day;
       const absentCount = absentMembers[dateStr]?.length || 0;
 
@@ -88,9 +99,17 @@ export const BillCalendar: React.FC<BillCalendarProps> = ({
           <Calendar className="h-5 w-5" />
           Attendance Calendar
         </CardTitle>
-        <p className="text-sm text-gray-600">
-          {format(currentDate, 'MMMM yyyy')}
-        </p>
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" size="sm" onClick={handlePrevMonth}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <p className="text-sm text-gray-600 font-medium">
+            {format(currentMonth, 'MMMM yyyy')}
+          </p>
+          <Button variant="ghost" size="sm" onClick={handleNextMonth}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Calendar Grid */}

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar } from 'lucide-react';
+import { Calendar, Users, Calculator } from 'lucide-react';
 import { BillCalendar } from '@/components/BillCalendar';
 import { MembersList } from '@/components/MembersList';
 import { BillSummary } from '@/components/BillSummary';
@@ -21,6 +21,7 @@ interface Member {
 const Index = () => {
   const [totalBill, setTotalBill] = useState(4967.37);
   const [totalDays, setTotalDays] = useState(30);
+  const [activeTab, setActiveTab] = useState<'attendance' | 'members' | 'summary'>('attendance');
   const [members, setMembers] = useState<Member[]>([
     { id: '1', name: 'DWIGHT', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
     { id: '2', name: 'MYCE', startDate: '2024-12-30', daysOut: 0, daysIn: 12 },
@@ -69,83 +70,123 @@ const Index = () => {
     );
   };
 
+  const renderActiveContent = () => {
+    switch (activeTab) {
+      case 'attendance':
+        return (
+          <BillCalendar
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+            members={members}
+            absentMembers={absentMembers}
+            onMemberAbsence={handleMemberAbsence}
+          />
+        );
+      case 'members':
+        return (
+          <MembersList 
+            members={members} 
+            billCalculation={billCalculation}
+            onMembersUpdate={setMembers}
+          />
+        );
+      case 'summary':
+        return (
+          <BillSummary 
+            totalBill={totalBill}
+            totalDays={totalDays}
+            perDay={perDay}
+            billCalculation={billCalculation}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 pb-20">
+      <div className="max-w-4xl mx-auto space-y-4">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-gray-900">Electricity Bill Calculator</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Electricity Bill Calculator</h1>
           <p className="text-gray-600">Manage monthly electricity costs and member attendance</p>
         </div>
 
-        {/* Bill Settings */}
+        {/* Compact Bill Settings */}
         <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-700">
-              <Calendar className="h-5 w-5" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-blue-700 text-lg">
+              <Calculator className="h-4 w-4" />
               Bill Settings
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="totalBill">Total Bill Amount (₱)</Label>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="totalBill" className="text-xs">Total Bill (₱)</Label>
                 <Input
                   id="totalBill"
                   type="number"
                   value={totalBill}
                   onChange={(e) => setTotalBill(parseFloat(e.target.value) || 0)}
-                  className="text-lg font-semibold"
+                  className="text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="totalDays">Total Days in Month</Label>
+              <div className="space-y-1">
+                <Label htmlFor="totalDays" className="text-xs">Total Days</Label>
                 <Input
                   id="totalDays"
                   type="number"
                   value={totalDays}
                   onChange={(e) => setTotalDays(parseInt(e.target.value) || 30)}
-                  className="text-lg font-semibold"
+                  className="text-sm"
                 />
               </div>
-            </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-600">Per Day Rate</p>
-              <p className="text-2xl font-bold text-blue-700">₱{perDay.toFixed(2)}</p>
+              <div className="space-y-1">
+                <Label className="text-xs">Per Day Rate</Label>
+                <div className="bg-blue-50 rounded px-2 py-1.5 text-center">
+                  <p className="text-sm font-bold text-blue-700">₱{perDay.toFixed(2)}</p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Calendar */}
-          <div className="lg:col-span-1">
-            <BillCalendar
-              selectedDate={selectedDate}
-              onDateSelect={setSelectedDate}
-              members={members}
-              absentMembers={absentMembers}
-              onMemberAbsence={handleMemberAbsence}
-            />
-          </div>
+        {/* Main Content */}
+        <div className="min-h-[400px]">
+          {renderActiveContent()}
+        </div>
 
-          {/* Members List */}
-          <div className="lg:col-span-1">
-            <MembersList 
-              members={members} 
-              billCalculation={billCalculation}
-              onMembersUpdate={setMembers}
-            />
-          </div>
-
-          {/* Bill Summary */}
-          <div className="lg:col-span-1">
-            <BillSummary 
-              totalBill={totalBill}
-              totalDays={totalDays}
-              perDay={perDay}
-              billCalculation={billCalculation}
-            />
+        {/* Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+          <div className="max-w-4xl mx-auto px-4 py-2">
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant={activeTab === 'attendance' ? 'default' : 'ghost'}
+                onClick={() => setActiveTab('attendance')}
+                className="flex flex-col items-center gap-1 h-auto py-2"
+              >
+                <Calendar className="h-4 w-4" />
+                <span className="text-xs">Attendance</span>
+              </Button>
+              <Button
+                variant={activeTab === 'members' ? 'default' : 'ghost'}
+                onClick={() => setActiveTab('members')}
+                className="flex flex-col items-center gap-1 h-auto py-2"
+              >
+                <Users className="h-4 w-4" />
+                <span className="text-xs">Members</span>
+              </Button>
+              <Button
+                variant={activeTab === 'summary' ? 'default' : 'ghost'}
+                onClick={() => setActiveTab('summary')}
+                className="flex flex-col items-center gap-1 h-auto py-2"
+              >
+                <Calculator className="h-4 w-4" />
+                <span className="text-xs">Bill Summary</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
