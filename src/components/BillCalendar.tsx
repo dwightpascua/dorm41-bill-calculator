@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, Users, ChevronLeft, ChevronRight, Settings, RotateCcw } from 'lucide-react';
 import { format, getDaysInMonth, startOfMonth, getDay, addMonths, subMonths } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface Member {
   id: string;
