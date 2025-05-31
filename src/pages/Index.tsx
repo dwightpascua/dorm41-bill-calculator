@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -129,7 +128,6 @@ const Index = () => {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-gray-900">Electricity Bill Calculator</h1>
-          <p className="text-gray-600">Manage monthly electricity costs and member attendance</p>
         </div>
 
         {/* Compact Bill Settings - Only show when not on summary tab */}
